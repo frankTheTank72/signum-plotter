@@ -12,3 +12,4 @@
 .cquery_cached_index
 *.bat
 *.exe
+Cargo.lock
