@@ -1,4 +1,4 @@
-# signum-plotter - plotter in Rust
+# signum-plotter
 
 ## Features
 - windows, linux, unix & macOS
