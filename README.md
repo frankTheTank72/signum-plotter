@@ -1,10 +1,6 @@
-<img align="right" src="https://i.imgur.com/PJsPNSG.png" height="200">
- 
- [![Build Status](https://travis-ci.org/PoC-Consortium/engraver.svg?branch=master)](https://travis-ci.org/PoC-Consortium/engraver) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+# signum-plotter - plotter in Rust
 
-# Engraver - PoC2 plotter in Rust
-
-### Features
+## Features
 - windows, linux, unix & macOS
 - x86 32&64bit 
 - direct and async i/o
@@ -12,35 +8,32 @@
 - gpu support
 - fastest plotter there is
 
-### Requirements
-- new version of rust [stable toolchain]
+## Binary files and source code releases
 
-### Compile, test, ...
+https://github.com/signum-network/signum-plotter/releases
 
-Binaries are in **target/debug** or **target/release** depending on optimization.
+## Running the binaries
+
+This is a command line tool, download the executable for your system and run it in a command prompt:
+
+```shell
+./signum-plotter --help
+```
+
+## Build from Sources
+
+ - First you need to install a Rust stable toolchain, check https://www.rust-lang.org/tools/install.
+ - Binaries are in **target/debug** or **target/release** depending on optimization.
 
 ``` shell
-# build debug und run directly
-cargo run [--features=opencl]
+# build release (optimized) with GPU support:
+cargo build --release [--features=opencl]
 
 # build debug (unoptimized)
 cargo build [--features=opencl]
-
-# build release (optimized)
-cargo build --release [--features=opencl]
 ```
 
-### Run
+## Forked from
 
-```shell
-engraver --help
-```
-
-### Donate 
-* JohnnyDeluxe: BURST-S338-R6VC-LTFA-2GC6G
-  - shabal optimizations
-  - windows support
-* bold: BURST-8V9Y-58B4-RVWP-8HQAV
-  - architecture
-  - linux support
+This is a code fork from https://github.com/PoC-Consortium/engraver
 

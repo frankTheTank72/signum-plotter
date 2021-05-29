@@ -1,14 +1,14 @@
 [package]
-name = "engraver"
-version = "2.5.0"
+name = "signum-plotter"
+version = "2.6.0"
 license = "GPL-3.0"
-authors = ["PoC Consortium <bots@cryptoguru.org>"]
+authors = ["jjos2372, forked from PoC Consortium"]
 description = """
-Engraver - a PoC2 plotter written in Rust
+signum-plotter - a PoC2 plotter written in Rust
 """
-repository = "https://github.com/PoC-Consortium/engraver"
-documentation = "https://github.com/PoC-Consortium/engraver"
-keywords = ["poc2", "plotter", "rust","cryptocurrency"]
+repository = "https://github.com/signum-network/signum-plotter"
+documentation = "https://github.com/signum-network/signum-plotter"
+keywords = ["signum", "plotter", "rust", "cryptocurrency"]
 readme = "README.md"
 edition = "2018"
 

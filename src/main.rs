@@ -25,7 +25,7 @@ use clap::{App, Arg};
 use std::cmp::min;
 
 fn main() {
-    let arg = App::new("Engraver")
+    let arg = App::new("signum-plotter")
         .version(crate_version!())
         .author(crate_authors!())
         .about(crate_description!())
@@ -51,19 +51,19 @@ fn main() {
             Arg::with_name("low priority")
                 .short("l")
                 .long("prio")
-                .help("Runs engraver with low priority")
+                .help("Runs with low priority")
                 .global(true),
         ).arg(
             Arg::with_name("non-verbosity")
                 .short("q")
                 .long("quiet")
-                .help("Runs engraver in non-verbose mode")
+                .help("Runs in non-verbose mode")
                 .global(true),
         ).arg(
             Arg::with_name("benchmark")
                 .short("b")
                 .long("bench")
-                .help("Runs engraver in xPU benchmark mode")
+                .help("Runs in xPU benchmark mode")
                 .global(true),
         )
         /*
