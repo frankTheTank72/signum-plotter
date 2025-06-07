@@ -119,7 +119,6 @@ fn main() {
         benchmark: args.benchmark,
         #[cfg(feature = "opencl")]
         zcb: args.zero_copy,
-        #[cfg(not(feature = "opencl"))]
         zcb: false,
     });
 }
