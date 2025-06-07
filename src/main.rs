@@ -97,7 +97,7 @@ fn main() {
     };
 
     let cores = sys_info::cpu_num().unwrap() as u8;
-    let mut cpu_threads = if cpu_threads == 0 { cores } else { std::cmp::min(2 * cores, cpu_threads) };
+    cpu_threads = if cpu_threads == 0 { cores } else { std::cmp::min(2 * cores, cpu_threads) };
 
     #[cfg(feature = "opencl")]
     if !args.gpu.is_empty() && args.cpu.is_none() {
