@@ -36,7 +36,7 @@ page_size = "0.4.1"
 thread-priority = "0.1.0"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["std","fileapi","securitybaseapi"] }
+winapi = { version = "0.3", features = ["std","fileapi","securitybaseapi","errhandlingapi"] }
 
 [build-dependencies]
 cc = "1.0"
