@@ -38,6 +38,7 @@ pub struct PlotterTask {
     pub async_io: bool,
     pub quiet: bool,
     pub benchmark: bool,
+    #[cfg(feature = "opencl")]
     pub zcb: bool,
 }
 
