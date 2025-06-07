@@ -1,25 +1,26 @@
 use std::fs::{File, OpenOptions};
+use cfg_if::cfg_if;
 use std::io;
 use std::path::Path;
 
 cfg_if! {
     if #[cfg(unix)] {
-        #[cfg(linux)]
+        #[cfg(target_os = "linux")]
         extern crate thread_priority;
         use std::process::Command;
         use std::process;
         use std::os::unix::fs::OpenOptionsExt;
         use fs2::FileExt;
-        #[cfg(linux)]
+        #[cfg(target_os = "linux")]
         use thread_priority::*;
 
         const O_DIRECT: i32 = 0o0_040_000;
 
         pub fn set_low_prio() {
             // todo: low prio for macos
-            #[cfg(linux)]
+            #[cfg(target_os = "linux")]
             let thread_id = thread_native_id();
-            #[cfg(linux)]
+            #[cfg(target_os = "linux")]
             set_thread_priority(
                 thread_id,
                 ThreadPriority::Min,

@@ -24,7 +24,7 @@ pub fn create_scheduler_thread(
     rx_empty_buffers: Receiver<PageAlignedByteBuffer>,
     tx_buffers_to_writer: Sender<PageAlignedByteBuffer>,
     simd_ext: SimdExtension,
-) -> impl FnOnce() {
+) -> impl FnOnce() + Send + 'static {
     move || {
         // synchronisation chanel for all hashing devices (CPU+GPU)
         // message protocol:    (hash_device_id: u8, message: u8, nonces processed: u64)
@@ -84,7 +84,7 @@ pub fn create_scheduler_thread(
                         .0
                         .send(Some(GpuTask {
                             cache: SafePointer {
-                                ptr: bs.as_mut_ptr(),
+                                ptr: bs.as_mut_ptr() as usize,
                             },
                             cache_size: buffer_size / NONCE_SIZE,
                             chunk_offset: requested,
@@ -105,7 +105,7 @@ pub fn create_scheduler_thread(
                         tx.clone(),
                         CpuTask {
                             cache: SafePointer {
-                                ptr: bs.as_mut_ptr(),
+                                ptr: bs.as_mut_ptr() as usize,
                             },
                             cache_size: (buffer_size / NONCE_SIZE) as usize,
                             chunk_offset: requested as usize,
@@ -135,7 +135,7 @@ pub fn create_scheduler_thread(
                                         tx.clone(),
                                         CpuTask {
                                             cache: SafePointer {
-                                                ptr: bs.as_mut_ptr(),
+                                                ptr: bs.as_mut_ptr() as usize,
                                             },
                                             cache_size: (buffer_size / NONCE_SIZE) as usize,
                                             chunk_offset: requested as usize,
@@ -178,7 +178,7 @@ pub fn create_scheduler_thread(
                                     .0
                                     .send(Some(GpuTask {
                                         cache: SafePointer {
-                                            ptr: bs.as_mut_ptr(),
+                                            ptr: bs.as_mut_ptr() as usize,
                                         },
                                         cache_size: buffer_size / NONCE_SIZE,
                                         chunk_offset: requested,

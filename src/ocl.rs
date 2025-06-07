@@ -3,7 +3,7 @@ use self::core::{
 };
 use crate::gpu_hasher::GpuTask;
 use crate::plotter::{NONCE_SIZE, NUM_SCOOPS, SCOOP_SIZE};
-use ocl_core as core;
+use ocl::core;
 use rayon::prelude::*;
 use std::cmp::min;
 use std::ffi::CString;
@@ -632,7 +632,7 @@ fn unpack_shuffle_scatter(buffer: *const u8, gpu_context: &GpuContext, transfer_
         iter.par_iter().for_each(|n| {
             // get global buffer
             let data = from_raw_parts_mut(
-                transfer_task.cache.ptr,
+                transfer_task.cache.ptr as *mut u8,
                 NONCE_SIZE as usize * transfer_task.cache_size as usize,
             );
             for i in 0..(NUM_SCOOPS * 2) {

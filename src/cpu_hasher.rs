@@ -46,7 +46,7 @@ extern "C" {
     );
 }
 pub struct SafePointer {
-    pub ptr: *mut u8,
+    pub ptr: usize,
 }
 unsafe impl Send for SafePointer {}
 unsafe impl Sync for SafePointer {}
@@ -59,6 +59,8 @@ pub struct CpuTask {
     pub local_startnonce: u64,
     pub local_nonces: u64,
 }
+unsafe impl Send for CpuTask {}
+unsafe impl Sync for CpuTask {}
 
 #[derive(Debug, Clone)]
 pub enum SimdExtension {
@@ -99,12 +101,12 @@ pub fn hash_cpu(
     tx: Sender<(u8, u8, u64)>,
     hasher_task: CpuTask,
     simd_ext: SimdExtension,
-) -> impl FnOnce() {
+) -> impl FnOnce() + Send + 'static {
     move || {
         unsafe {
             match simd_ext {
                 SimdExtension::AVX512f => noncegen_avx512(
-                    hasher_task.cache.ptr as *mut c_void,
+                    hasher_task.cache.ptr as *mut u8 as *mut c_void,
                     hasher_task.cache_size,
                     hasher_task.chunk_offset,
                     hasher_task.numeric_id,
@@ -112,7 +114,7 @@ pub fn hash_cpu(
                     hasher_task.local_nonces,
                 ),
                 SimdExtension::AVX2 => noncegen_avx2(
-                    hasher_task.cache.ptr as *mut c_void,
+                    hasher_task.cache.ptr as *mut u8 as *mut c_void,
                     hasher_task.cache_size,
                     hasher_task.chunk_offset,
                     hasher_task.numeric_id,
@@ -120,7 +122,7 @@ pub fn hash_cpu(
                     hasher_task.local_nonces,
                 ),
                 SimdExtension::AVX => noncegen_avx(
-                    hasher_task.cache.ptr as *mut c_void,
+                    hasher_task.cache.ptr as *mut u8 as *mut c_void,
                     hasher_task.cache_size,
                     hasher_task.chunk_offset,
                     hasher_task.numeric_id,
@@ -128,7 +130,7 @@ pub fn hash_cpu(
                     hasher_task.local_nonces,
                 ),
                 SimdExtension::SSE2 => noncegen_sse2(
-                    hasher_task.cache.ptr as *mut c_void,
+                    hasher_task.cache.ptr as *mut u8 as *mut c_void,
                     hasher_task.cache_size,
                     hasher_task.chunk_offset,
                     hasher_task.numeric_id,
@@ -137,7 +139,7 @@ pub fn hash_cpu(
                 ),
                 _ => {
                     let data = from_raw_parts_mut(
-                        hasher_task.cache.ptr,
+                        hasher_task.cache.ptr as *mut u8,
                         hasher_task.cache_size * NONCE_SIZE,
                     );
                     noncegen_rust(

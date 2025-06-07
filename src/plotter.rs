@@ -38,6 +38,7 @@ pub struct PlotterTask {
     pub async_io: bool,
     pub quiet: bool,
     pub benchmark: bool,
+    #[cfg(feature = "opencl")]
     pub zcb: bool,
 }
 
@@ -56,7 +57,7 @@ impl Plotter {
         let simd_ext = init_simd();
 
         if !task.quiet {
-            println!("signum-plotter {}\n", crate_version!());
+            println!("signum-plotter {}\n", env!("CARGO_PKG_VERSION"));
         }
 
         if !task.quiet && task.benchmark {

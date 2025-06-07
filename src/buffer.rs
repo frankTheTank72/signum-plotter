@@ -1,39 +1,23 @@
-use aligned_alloc::{aligned_alloc, aligned_free};
 use std::sync::{Arc, Mutex};
 
 pub struct PageAlignedByteBuffer {
-    data: Option<Arc<Mutex<Vec<u8>>>>,
-    pointer: *mut (),
+    data: Arc<Mutex<Vec<u8>>>,
 }
 
 impl PageAlignedByteBuffer {
     pub fn new(buffer_size: usize) -> Self {
-        let pointer = aligned_alloc(buffer_size, page_size::get());
-        let data: Vec<u8>;
-        unsafe {
-            data = Vec::from_raw_parts(pointer as *mut u8, buffer_size, buffer_size);
-        }
         PageAlignedByteBuffer {
-            data: Some(Arc::new(Mutex::new(data))),
-            pointer,
+            data: Arc::new(Mutex::new(vec![0u8; buffer_size])),
         }
     }
 
     pub fn get_buffer(&self) -> Arc<Mutex<Vec<u8>>> {
-        self.data.as_ref().unwrap().clone()
+        self.data.clone()
     }
 }
 
-impl Drop for PageAlignedByteBuffer {
-    fn drop(&mut self) {
-        std::mem::forget(self.data.take().unwrap());
-        unsafe {
-            aligned_free(self.pointer);
-        }
-    }
-}
 
-unsafe impl Send for PageAlignedByteBuffer {}
+// `Arc<Mutex<Vec<u8>>>` is Send + Sync by default, so no manual impls needed.
 
 #[cfg(test)]
 mod buffer_tests {
