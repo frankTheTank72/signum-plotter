@@ -79,7 +79,7 @@ fn main() {
             .unwrap()
     });
     let mem = args.memory.unwrap_or_else(|| "0B".to_owned());
-    let cpu_threads = args.cpu.unwrap_or(0u8);
+    let mut cpu_threads = args.cpu.unwrap_or(0u8);
 
     let gpus = {
         #[cfg(feature = "opencl")]
