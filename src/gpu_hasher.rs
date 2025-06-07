@@ -18,12 +18,12 @@ pub fn create_gpu_hasher_thread(
     gpu_context: Arc<Mutex<GpuContext>>,
     tx: Sender<(u8, u8, u64)>,
     rx_hasher_task: Receiver<Option<GpuTask>>,
-) -> impl FnOnce() {
+) -> impl FnOnce() + Send + 'static {
     move || {
         let mut first_run = true;
         let mut buffer_id = 0u8;
         let mut last_task = GpuTask {
-            cache: SafePointer { ptr: &mut 0u8 },
+            cache: SafePointer { ptr: 0 },
             cache_size: 0,
             chunk_offset: 0,
             numeric_id: 0,

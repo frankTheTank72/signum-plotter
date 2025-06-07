@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate clap;
-#[macro_use]
-extern crate cfg_if;
+use clap::{ArgGroup, Parser};
 
 mod cpu_hasher;
 #[cfg(feature = "opencl")]
@@ -18,227 +15,94 @@ mod buffer;
 
 use crate::plotter::{Plotter, PlotterTask};
 use crate::utils::set_low_prio;
-use clap::AppSettings::{ArgRequiredElseHelp, DeriveDisplayOrder, VersionlessSubcommands};
-#[cfg(feature = "opencl")]
-use clap::ArgGroup;
-use clap::{App, Arg};
-use std::cmp::min;
 
-fn main() {
-    let arg = App::new("signum-plotter")
-        .version(crate_version!())
-        .author(crate_authors!())
-        .about(crate_description!())
-        /*
-        .setting(SubcommandRequiredElseHelp)
-        */
-        .setting(ArgRequiredElseHelp)
-        .setting(DeriveDisplayOrder)
-        .setting(VersionlessSubcommands)
-        .arg(
-            Arg::with_name("disable direct i/o")
-                .short("d")
-                .long("ddio")
-                .help("Disables direct i/o")
-                .global(true),
-        ).arg(
-            Arg::with_name("disable async i/o")
-                .short("a")
-                .long("daio")
-                .help("Disables async writing (single RAM buffer mode)")
-                .global(true),
-        ).arg(
-            Arg::with_name("low priority")
-                .short("l")
-                .long("prio")
-                .help("Runs with low priority")
-                .global(true),
-        ).arg(
-            Arg::with_name("non-verbosity")
-                .short("q")
-                .long("quiet")
-                .help("Runs in non-verbose mode")
-                .global(true),
-        ).arg(
-            Arg::with_name("benchmark")
-                .short("b")
-                .long("bench")
-                .help("Runs in xPU benchmark mode")
-                .global(true),
-        )
-        /*
-        .subcommand(
-            SubCommand::with_name("plot")
-                .about("Plots a PoC2 file for your account ID")
-                .setting(ArgRequiredElseHelp)
-                .setting(DeriveDisplayOrder)
-                */.arg(
-                    Arg::with_name("numeric id")
-                        .short("i")
-                        .long("id")
-                        .value_name("numeric_ID")
-                        .help("your numeric Account ID")
-                        .takes_value(true)
-                        .required_unless("ocl-devices"),
-                ).arg(
-                    Arg::with_name("start nonce")
-                        .short("s")
-                        .long("sn")
-                        .value_name("start_nonce")
-                        .help("where you want to start plotting")
-                        .takes_value(true)
-                        .required_unless("ocl-devices"),
-                ).arg(
-                    Arg::with_name("nonces")
-                        .short("n")
-                        .long("n")
-                        .value_name("nonces")
-                        .help("how many nonces you want to plot")
-                        .takes_value(true)
-                        .required_unless("ocl-devices"),
-                ).arg(
-                    Arg::with_name("path")
-                        .short("p")
-                        .long("path")
-                        .value_name("path")
-                        .help("target path for plotfile (optional)")
-                        .takes_value(true)
-                        .required(false),
-                ).arg(
-                    Arg::with_name("memory")
-                        .short("m")
-                        .long("mem")
-                        .value_name("memory")
-                        .help("maximum memory usage (optional)")
-                        .takes_value(true)
-                        .required(false),
-                ).args(&[
-                    Arg::with_name("cpu")
-                        .short("c")
-                        .long("cpu")
-                        .value_name("threads")
-                        .help("maximum cpu threads you want to use (optional)")
-                        .required(false)
-                        .takes_value(true),
-                    #[cfg(feature = "opencl")]
-                    Arg::with_name("gpu")
-                        .short("g")
-                        .long("gpu")
-                        .value_name("platform_id:device_id:cores")
-                        .help("GPU(s) you want to use for plotting (optional)")
-                        .multiple(true)
-                        .takes_value(true),
-                ]).groups(&[#[cfg(feature = "opencl")]
-                ArgGroup::with_name("processing")
-                    .args(&["cpu", "gpu"])
-                    .multiple(true)])
-                    /*
-                    .arg(
-                    Arg::with_name("ssd buffer")
-                        .short("b")
-                        .long("ssd_cache")
-                        .value_name("ssd_cache")
-                        .help("*path to ssd cache for staging (optional)")
-                        .takes_value(true)
-                        .required(false),
-                        
-                ),
-                
-        ).subcommand(
-            SubCommand::with_name("encode")
-                .about("*Individualizes a PoC3 reference file for your account ID")
-                .display_order(2)
-                .arg(
-                    Arg::with_name("numeric id")
-                        .short("i")
-                        .long("numeric_ID")
-                        .value_name("numeric ID")
-                        .help("numeric Account ID")
-                        .takes_value(true),
-                ),
-        ).subcommand(
-            SubCommand::with_name("decode")
-                .about("*Restores a PoC3 reference file from an individualized file")
-                .display_order(3)
-                .arg(
-                    Arg::with_name("numeric id")
-                        .short("i")
-                        .long("numeric_ID")
-                        .value_name("numeric ID")
-                        .help("numeric Account ID")
-                        .takes_value(true)
-                        .required(true),
-                ),
-                
-        )*/;
+#[derive(Parser, Debug)]
+#[command(name = "signum-plotter", version, author, about, arg_required_else_help = true)]
+#[command(group(ArgGroup::new("processing").args(["cpu", "gpu"]).multiple(true)))]
+struct Args {
+    #[arg(short = 'd', long = "ddio", help = "Disables direct i/o")]
+    disable_direct_io: bool,
+    #[arg(short = 'a', long = "daio", help = "Disables async writing (single RAM buffer mode)")]
+    disable_async_io: bool,
+    #[arg(short = 'l', long = "prio", help = "Runs with low priority")]
+    low_priority: bool,
+    #[arg(short = 'q', long = "quiet", help = "Runs in non-verbose mode")]
+    quiet: bool,
+    #[arg(short = 'b', long = "bench", help = "Runs in xPU benchmark mode")]
+    benchmark: bool,
+
+    #[arg(short = 'i', long = "id", required_unless_present = "ocl-devices", value_name = "numeric_ID")]
+    numeric_id: Option<u64>,
+    #[arg(short = 's', long = "sn", required_unless_present = "ocl-devices", value_name = "start_nonce")]
+    start_nonce: Option<u64>,
+    #[arg(short = 'n', long = "n", required_unless_present = "ocl-devices", value_name = "nonces")]
+    nonces: Option<u64>,
+    #[arg(short = 'p', long = "path", value_name = "path")]
+    path: Option<String>,
+    #[arg(short = 'm', long = "mem", value_name = "memory")]
+    memory: Option<String>,
+    #[arg(short = 'c', long = "cpu", value_name = "threads")]
+    cpu: Option<u8>,
 
     #[cfg(feature = "opencl")]
-    let arg = arg
-        .arg(
-            Arg::with_name("ocl-devices")
-                .short("o")
-                .long("opencl")
-                .help("Display OpenCL platforms and devices")
-                .global(true),
-        )
-        .arg(
-            Arg::with_name("zero-copy")
-                .short("z")
-                .long("zcb")
-                .help("Enables zero copy buffers for shared mem (integrated) gpus")
-                .global(true),
-        );
-    let matches = &arg.get_matches();
+    #[arg(short = 'g', long = "gpu", value_name = "platform_id:device_id:cores", num_args=1..)]
+    gpu: Vec<String>,
+    #[cfg(feature = "opencl")]
+    #[arg(short = 'o', long = "opencl", help = "Display OpenCL platforms and devices")]
+    ocl_devices: bool,
+    #[cfg(feature = "opencl")]
+    #[arg(short = 'z', long = "zcb", help = "Enables zero copy buffers for shared mem (integrated) gpus")]
+    zero_copy: bool,
+}
 
-    if matches.is_present("low priority") {
+fn main() {
+    let args = Args::parse();
+
+    if args.low_priority {
         set_low_prio();
     }
 
-    if matches.is_present("ocl-devices") {
-        #[cfg(feature = "opencl")]
+    #[cfg(feature = "opencl")]
+    if args.ocl_devices {
         ocl::platform_info();
         return;
     }
 
-    // plotting
-    /* subcommand
-    if let Some(matches) = matches.subcommand_matches("plot") {
-    */
-    let numeric_id = value_t!(matches, "numeric id", u64).unwrap_or_else(|e| e.exit());
-    let start_nonce = value_t!(matches, "start nonce", u64).unwrap_or_else(|e| e.exit());
-    let nonces = value_t!(matches, "nonces", u64).unwrap_or_else(|e| e.exit());
-    let output_path = value_t!(matches, "path", String).unwrap_or_else(|_| {
+    let numeric_id = args.numeric_id.expect("numeric id required");
+    let start_nonce = args.start_nonce.expect("start nonce required");
+    let nonces = args.nonces.expect("nonces required");
+    let output_path = args.path.unwrap_or_else(|| {
         std::env::current_dir()
             .unwrap()
             .into_os_string()
             .into_string()
             .unwrap()
     });
-    let mem = value_t!(matches, "memory", String).unwrap_or_else(|_| "0B".to_owned());
-    let cpu_threads = value_t!(matches, "cpu", u8).unwrap_or(0u8);
+    let mem = args.memory.unwrap_or_else(|| "0B".to_owned());
+    let cpu_threads = args.cpu.unwrap_or(0u8);
 
-    let gpus = if matches.occurrences_of("gpu") > 0 {
-        let gpu = values_t!(matches, "gpu", String);
-        Some(gpu.unwrap())
-    } else {
-        None
+    let gpus = {
+        #[cfg(feature = "opencl")]
+        {
+            if !args.gpu.is_empty() {
+                Some(args.gpu.clone())
+            } else {
+                None
+            }
+        }
+        #[cfg(not(feature = "opencl"))]
+        {
+            None
+        }
     };
 
-    // work out number of cpu threads to use
     let cores = sys_info::cpu_num().unwrap() as u8;
-    let cpu_threads = if cpu_threads == 0 {
-        cores
-    } else {
-        min(2 * cores, cpu_threads)
-    };
+    let mut cpu_threads = if cpu_threads == 0 { cores } else { std::cmp::min(2 * cores, cpu_threads) };
 
-    // special case: dont use cpu if only a gpu is defined
     #[cfg(feature = "opencl")]
-    let cpu_threads = if matches.occurrences_of("gpu") > 0 && matches.occurrences_of("cpu") == 0 {
-        0u8
-    } else {
-        cpu_threads
-    };
+    if !args.gpu.is_empty() && args.cpu.is_none() {
+        cpu_threads = 0;
+    }
 
     let p = Plotter::new();
     p.run(PlotterTask {
@@ -249,10 +113,13 @@ fn main() {
         mem,
         cpu_threads,
         gpus,
-        direct_io: !matches.is_present("disable direct i/o"),
-        async_io: !matches.is_present("disable async i/o"),
-        quiet: matches.is_present("non-verbosity"),
-        benchmark: matches.is_present("benchmark"),
-        zcb: matches.is_present("zero-copy"),
+        direct_io: !args.disable_direct_io,
+        async_io: !args.disable_async_io,
+        quiet: args.quiet,
+        benchmark: args.benchmark,
+        #[cfg(feature = "opencl")]
+        zcb: args.zero_copy,
+        #[cfg(not(feature = "opencl"))]
+        zcb: false,
     });
 }
